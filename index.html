@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Story Hours Calculator</title>
+    <style>
+        body {
+            font-family: Arial;
+            padding: 20px;
+            max-width: 400px;
+            margin: auto;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin: 6px 0;
+        }
+        .result {
+            font-weight: bold;
+            padding-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Story Hours Calculator</h2>
+
+<label>Dev Story Points (0–10)</label>
+<input type="number" id="devPoints" min="0" max="10" value="1" oninput="calculate()">
+
+<label>Dev Buffer Hours</label>
+<input type="number" id="devBuffer" min="0" value="0" oninput="calculate()">
+
+<label>QA Story Points (0–10)</label>
+<input type="number" id="qaPoints" min="0" max="10" value="1" oninput="calculate()">
+
+<label>QA Buffer Hours</label>
+<input type="number" id="qaBuffer" min="0" value="0" oninput="calculate()">
+
+<div class="result" id="output"></div>
+
+<script>
+function calculate() {
+    let devPoints = Number(document.getElementById("devPoints").value);
+    let qaPoints = Number(document.getElementById("qaPoints").value);
+    let devBuffer = Number(document.getElementById("devBuffer").value);
+    let qaBuffer = Number(document.getElementById("qaBuffer").value);
+
+    let devHours = (devPoints * 6) + devBuffer;
+    let qaHours = (qaPoints * 4) + qaBuffer;
+    let total = devHours + qaHours;
+
+    document.getElementById("output").innerHTML = 
+        "Dev Hours: " + devHours + " hrs<br>" +
+        "QA Hours: " + qaHours + " hrs<br><br>" +
+        "Total Hours: " + total + " hrs";
+}
+calculate();
+</script>
+
+</body>
+</html>
