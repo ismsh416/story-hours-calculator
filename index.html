@@ -1,60 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>Story Hours Calculator</title>
+    <meta charset="UTF-8" />
+    <title>Story Hours Calculator (Pro Version)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
     <style>
-        body {
-            font-family: Arial;
-            padding: 20px;
-            max-width: 1000px;
-            margin: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-
-        th, td {
-            border: 1px solid #ccc;
-            padding: 8px;
-            text-align: center;
-            position: relative; /* important */
-        }
-
         input {
-            width: 100%;
-            padding: 6px;
-            background: white;
-            box-sizing: border-box;
+            background: white !important;
         }
-
-        .add-btn {
-            padding: 10px 18px;
-            margin-top: 15px;
-            background: black;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 6px;
-        }
-
-        .section-title {
-            margin-top: 35px;
-            font-size: 22px;
-            font-weight: bold;
-        }
-
-        .total-box {
-            margin-top: 20px;
-            padding: 15px;
-            background: #f3f3f3;
-            font-size: 18px;
-            font-weight: bold;
-        }
-
         .red {
             color: red;
             font-weight: bold;
@@ -62,82 +16,188 @@
     </style>
 </head>
 
-<body>
+<body class="bg-gray-100 p-6">
 
-<h2>Story Hours Calculator</h2>
+<!-- MAIN CONTAINER -->
+<div class="max-w-5xl mx-auto space-y-10">
 
-<button class="add-btn" onclick="addStory()">+ Add Story</button>
+    <!-- TITLE -->
+    <h1 class="text-3xl font-bold text-gray-800 text-center">
+        Story Hours Calculator (Pro Version)
+    </h1>
 
-<table id="storyTable">
-    <tr>
-        <th>Story #</th>
-        <th>Points</th>
-        <th>Dev Hours</th>
-        <th>QA Hours</th>
-        <th>Dev Buffer</th>
-        <th>QA Buffer</th>
-        <th>Total Hours</th>
-    </tr>
-</table>
 
-<div class="total-box">
-    Grand Total: <span id="grandTotal">0</span> hrs
+    <!-- ====================================================== -->
+    <!--  CALCULATOR 1 - STORY HOURS -->
+    <!-- ====================================================== -->
+    <div class="bg-white shadow-lg p-6 rounded-xl">
+
+        <div class="flex items-center justify-between">
+            <h2 class="text-xl font-semibold">Story Hours</h2>
+
+            <button onclick="addStory()"
+                class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
+                + Add Story
+            </button>
+        </div>
+
+        <!-- Preset Buttons -->
+        <div class="mt-4 flex gap-3">
+            <button onclick="applyPreset([3,2,2])"
+                class="bg-gray-200 px-3 py-1 rounded-lg">3,2,2</button>
+
+            <button onclick="applyPreset([5,3,2,1])"
+                class="bg-gray-200 px-3 py-1 rounded-lg">5,3,2,1</button>
+
+            <button onclick="applyPreset([1,1,1])"
+                class="bg-gray-200 px-3 py-1 rounded-lg">1,1,1</button>
+        </div>
+
+        <!-- Story Table -->
+        <div class="overflow-x-auto mt-6">
+            <table id="storyTable" class="w-full border text-center">
+                <tr class="bg-gray-200 font-semibold">
+                    <th class="border p-2">#</th>
+                    <th class="border p-2">Points</th>
+                    <th class="border p-2">Dev Hours</th>
+                    <th class="border p-2">QA Hours</th>
+                    <th class="border p-2">Dev Buffer</th>
+                    <th class="border p-2">QA Buffer</th>
+                    <th class="border p-2">Total</th>
+                    <th class="border p-2">Delete</th>
+                </tr>
+            </table>
+        </div>
+
+        <div class="text-lg font-bold mt-4">
+            Grand Total: <span id="grandTotal">0</span> hrs
+        </div>
+
+        <div id="validationMsg" class="text-red-600 font-semibold mt-2"></div>
+    </div>
+
+
+
+    <!-- ====================================================== -->
+    <!--  CALCULATOR 2 - JAVA LOGIC SPLITTER -->
+    <!-- ====================================================== -->
+    <div class="bg-white shadow-lg p-6 rounded-xl">
+
+        <h2 class="text-xl font-semibold">Dev Hours Split (Java Logic)</h2>
+
+        <div class="mt-4">
+            <label class="font-medium">Total Dev Hours:</label>
+            <input type="number" id="splitTotalHours" value="54"
+                class="border w-40 px-3 py-2 rounded-lg ml-3"
+                oninput="runSplitter()">
+        </div>
+
+        <div class="overflow-x-auto mt-6">
+            <table id="splitResultTable" class="w-full border text-center">
+                <tr class="bg-gray-200 font-semibold">
+                    <th class="border p-2">Story #</th>
+                    <th class="border p-2">Points</th>
+                    <th class="border p-2">Allocated Hours</th>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+
 </div>
 
-<!-- ------------------ CALCULATOR 2 ------------------ -->
-
-<div class="section-title">Dev Hours Split Based on Story Points</div>
-
-<label>Total Dev Hours:</label>
-<input type="number" id="splitTotalHours" value="54" oninput="runSplitter()" />
-
-<table id="splitResultTable">
-    <tr>
-        <th>Story #</th>
-        <th>Points</th>
-        <th>Allocated Hours</th>
-    </tr>
-</table>
 
 
+<!-- ====================================================== -->
+<!-- JAVASCRIPT -->
+<!-- ====================================================== -->
 <script>
 let storyCount = 0;
 
-function addStory() {
+function addStory(pointsValue = 1) {
     storyCount++;
 
-    let table = document.getElementById("storyTable");
+    const table = document.getElementById("storyTable");
     let row = table.insertRow(-1);
 
     row.innerHTML = `
-        <td>${storyCount}</td>
-        <td><input type="number" class="points" min="1" value="1" oninput="recalcAll()"></td>
-        <td><input type="number" class="dev" min="0" value="6" oninput="devChanged(this)"></td>
-        <td><input type="number" class="qa" min="0" value="4" oninput="calculate()"></td>
-        <td><input type="number" class="devBuf" min="0" value="0" oninput="calculate()"></td>
-        <td><input type="number" class="qaBuf" min="0" value="0" oninput="calculate()"></td>
-        <td class="storyTotal">10</td>
+        <td class="border p-2">${storyCount}</td>
+        <td class="border p-2">
+            <input type="number" class="points w-full border rounded px-2 py-1"
+                value="${pointsValue}" min="1" oninput="recalcAll()">
+        </td>
+
+        <td class="border p-2">
+            <input type="number" class="dev w-full border rounded px-2 py-1"
+                value="${pointsValue * 6}" oninput="devChanged(this)">
+        </td>
+
+        <td class="border p-2">
+            <input type="number" class="qa w-full border rounded px-2 py-1"
+                value="${pointsValue * 4}" oninput="calculate()">
+        </td>
+
+        <td class="border p-2">
+            <input type="number" class="devBuf w-full border rounded px-2 py-1"
+                value="0" oninput="calculate()">
+        </td>
+
+        <td class="border p-2">
+            <input type="number" class="qaBuf w-full border rounded px-2 py-1"
+                value="0" oninput="calculate()">
+        </td>
+
+        <td class="storyTotal border p-2 font-semibold">10</td>
+
+        <td class="border p-2">
+            <button onclick="deleteRow(this)"
+                class="bg-red-500 text-white px-3 py-1 rounded">
+                X
+            </button>
+        </td>
     `;
 
-    runSplitter();
     calculate();
+    runSplitter();
 }
 
-function devChanged(devInput) {
-    let row = devInput.parentNode.parentNode;
-    let points = Number(row.querySelector(".points").value);
-    let qaInput = row.querySelector(".qa");
-    qaInput.value = points * 4;
+function deleteRow(btn) {
+    const row = btn.parentNode.parentNode;
+    row.remove();
+    renumberStories();
+    calculate();
+    runSplitter();
+}
+
+function renumberStories() {
+    const rows = document.querySelectorAll("#storyTable tr");
+    storyCount = 0;
+    for (let i = 1; i < rows.length; i++) {
+        storyCount++;
+        rows[i].cells[0].innerText = storyCount;
+    }
+}
+
+function applyPreset(pointsList) {
+    document.querySelectorAll("#storyTable tr:not(:first-child)").forEach(r => r.remove());
+    storyCount = 0;
+
+    pointsList.forEach(p => addStory(p));
+}
+
+function devChanged(input) {
+    const row = input.parentNode.parentNode;
+    const points = Number(row.querySelector(".points").value);
+    row.querySelector(".qa").value = points * 4;
     calculate();
 }
 
 function calculate() {
-    let rows = document.getElementById("storyTable").rows;
+    let rows = document.querySelectorAll("#storyTable tr");
     let grand = 0;
 
     for (let i = 1; i < rows.length; i++) {
-        let row = rows[i];
-
+        const row = rows[i];
         let points = Number(row.querySelector(".points").value);
         let dev = Number(row.querySelector(".dev").value);
         let qa = Number(row.querySelector(".qa").value);
@@ -147,20 +207,25 @@ function calculate() {
         let total = dev + qa + devBuf + qaBuf;
         let expected = points * 10;
 
-        let totalCell = row.querySelector(".storyTotal");
-        totalCell.innerText = total;
+        let cell = row.querySelector(".storyTotal");
+        cell.innerText = total;
 
-        if (total !== expected) {
-            totalCell.classList.add("red");
-        } else {
-            totalCell.classList.remove("red");
-        }
+        if (total !== expected) cell.classList.add("red");
+        else cell.classList.remove("red");
 
         grand += total;
     }
 
     document.getElementById("grandTotal").innerText = grand;
+    validate(grand);
     runSplitter();
+}
+
+function validate(grand) {
+    const msg = document.getElementById("validationMsg");
+    msg.innerHTML = grand % 10 !== 0
+        ? "⚠️ Total does not align with point rules!"
+        : "";
 }
 
 function recalcAll() {
@@ -169,56 +234,50 @@ function recalcAll() {
 }
 
 function runSplitter() {
-    let splitTable = document.getElementById("splitResultTable");
+    let table = document.getElementById("splitResultTable");
+    while (table.rows.length > 1) table.deleteRow(1);
 
-    while (splitTable.rows.length > 1) {
-        splitTable.deleteRow(1);
-    }
-
-    let totalHours = Number(document.getElementById("splitTotalHours").value);
-    let pointsArr = [];
-
-    let rows = document.getElementById("storyTable").rows;
-    for (let i = 1; i < rows.length; i++) {
-        pointsArr.push(Number(rows[i].querySelector(".points").value));
-    }
+    // Collect points from Calculator 1
+    let pointsArr = Array.from(document.querySelectorAll("#storyTable .points"))
+        .map(inp => Number(inp.value));
 
     if (pointsArr.length === 0) return;
 
-    let allocated = splitHoursByStoryPoints(totalHours, pointsArr);
-
+    // New simple rule: hours = points * 6
     for (let i = 0; i < pointsArr.length; i++) {
-        let row = splitTable.insertRow(-1);
+        let pts = pointsArr[i];
+        let hrs = pts * 6;
+
+        let row = table.insertRow(-1);
         row.innerHTML = `
-            <td>${i + 1}</td>
-            <td>${pointsArr[i]}</td>
-            <td>${allocated[i]}</td>
+            <td class="border p-2">${i + 1}</td>
+            <td class="border p-2">${pts}</td>
+            <td class="border p-2">${hrs}</td>
         `;
     }
 }
 
 function splitHoursByStoryPoints(totalHours, storyPoints) {
-    let totalPoints = storyPoints.reduce((a, b) => a + b, 0);
+    let totalPoints = storyPoints.reduce((a,b)=>a+b,0);
     let remainingHours = totalHours;
     let remainingPoints = totalPoints;
-
-    let hoursPerStory = [];
+    let result = [];
 
     for (let pts of storyPoints) {
         let hrs = Math.round((pts / remainingPoints) * remainingHours);
-        hoursPerStory.push(hrs);
+        result.push(hrs);
         remainingHours -= hrs;
         remainingPoints -= pts;
     }
 
     let i = 0;
     while (remainingHours > 0) {
-        hoursPerStory[i] += 1;
+        result[i]++;
         remainingHours--;
-        i = (i + 1) % hoursPerStory.length;
+        i = (i + 1) % result.length;
     }
 
-    return hoursPerStory;
+    return result;
 }
 
 addStory();
